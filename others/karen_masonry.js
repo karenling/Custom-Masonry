@@ -1,46 +1,64 @@
 var $ = require('jquery');
 
-var masonry = function(selector, padding) {
-  containerWidth = $(selector).width() - padding;
-  var height;
-  var currentImages = [];
-  var currentRow = 0;
-  $('.img-item img').each(function(idx, img) {
-    var ratio = $(img).data('ratio');
-    currentImages.push(img);
-    currentRow += ratio;
-    if (currentRow >= ratioMax()) {
-      var totalMargins = (currentImages.length - 1) * padding;
-      height = (containerWidth - totalMargins)/currentRow;
-      resizeRow(currentImages, currentRow, height, padding);
-      currentImages = [];
-      currentRow = 0;
-    }
-  });
-  resizeRow(currentImages, currentRow, height, padding);
+var Masonry = function(selector,padding) {
+  this.$selector = $(selector);
+  this.padding = padding;
+  this.containerWidth = $(selector).width() - this.padding;
+  this.$selector.css('padding', padding/2);
+  this.resizeImages();
 };
 
-var resizeRow = function(currentImages, currentRow, height, padding) {
-  currentImages.forEach(function(currentImg) {
-    var ratio = $(currentImg).data('ratio');
-    $(currentImg).parent().width(height * ratio);
-    $(currentImg).parent().height(height);
-    $(currentImg).parent().css('padding', padding/2);
-  });
+Masonry.prototype.resizeImages = function() {
+  this.currentImages = [];
+  this.currentRow = 0;
+  this.$selector.find('> div > img').each(function(idx,img) {
+    this.handleRow(idx,img);
+  }.bind(this));
+  this.resizeRow();
 };
 
-var ratioMax = function() {
-  if (containerWidth < 500) {
-    return 0;
-  } else if (containerWidth < 800) {
-    return 3;
-  } else {
-    return 5;
+Masonry.prototype.handleRow = function(idx,img) {
+  var ratio = $(img).data('ratio');
+  this.currentImages.push(img);
+  this.currentRow += ratio;
+  if (this.currentRow >= this.getColumns()) {
+    this.setupRow();
   }
 };
 
-KarenMasonry = function(selector, padding) {
-  var containerWidth = $(selector).width();
-  $(selector).css('padding', padding/2);
-  masonry(selector, padding);
+Masonry.prototype.setupRow = function() {
+  var totalMargins = (this.currentImages.length - 1) * this.padding;
+  this.height = (this.containerWidth - totalMargins)/this.currentRow;
+  this.resizeRow();
+  this.currentImages = [];
+  this.currentRow = 0;
+};
+
+Masonry.prototype.resizeRow = function() {
+  this.currentImages.forEach(function(currentImg) {
+    this.resizeImgContainer(currentImg);
+  }.bind(this));
+};
+
+Masonry.prototype.resizeImgContainer = function(currentImg) {
+  var ratio = $(currentImg).data('ratio');
+  $(currentImg).parent().width(this.height * ratio);
+  $(currentImg).parent().height(this.height);
+  $(currentImg).parent().css('padding', this.padding/2);
+};
+
+Masonry.prototype.getColumns = function() {
+  if (this.containerWidth < 544) {
+    return 1;
+  } else if (this.containerWidth < 768) {
+    return 2;
+  } else if (this.containerWidth < 992) {
+    return 3;
+  } else {
+    return 4;
+  }
+};
+
+KarenMasonry = function(selector,padding) {
+  new Masonry(selector,padding);
 };

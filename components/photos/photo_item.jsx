@@ -29,7 +29,7 @@ var PhotoItem = React.createClass({
   },
   render: function() {
     return(
-      <article
+      <div
         className={'img-item liked-' + this.state.liked + ' loaded-' + this.state.loaded}
         onClick={this.handleClick}
         onMouseOver={this.toggleViews}>
@@ -51,7 +51,7 @@ var PhotoItem = React.createClass({
             {}
           </div>
         </div>
-      </article>
+      </div>
     )
   }
 });
